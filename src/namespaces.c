@@ -1,6 +1,6 @@
 #include "proc.h"
 
-static const char *ns_name(const char *short_name)
+static const char *lookup_ns(const char *short_name)
 {
     if (strcmp(short_name, "pid") == 0) return "PID";
     if (strcmp(short_name, "mnt") == 0) return "Mount";
@@ -11,6 +11,24 @@ static const char *ns_name(const char *short_name)
     if (strcmp(short_name, "cgroup") == 0) return "Cgroup";
     if (strcmp(short_name, "time") == 0) return "Time";
     return short_name;
+}
+
+static const char *ns_name(const char *short_name)
+{
+    static char buf[64];
+    size_t len = strlen(short_name);
+    const char *suffix = "_for_children";
+    size_t suffix_len = strlen(suffix);
+
+    if (len > suffix_len &&
+        strcmp(short_name + len - suffix_len, suffix) == 0) {
+        char base[64];
+        snprintf(base, sizeof(base), "%.*s", (int)(len - suffix_len), short_name);
+        snprintf(buf, sizeof(buf), "%s (children)", lookup_ns(base));
+        return buf;
+    }
+
+    return lookup_ns(short_name);
 }
 
 int show_namespaces(pid_t pid)
