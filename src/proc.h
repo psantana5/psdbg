@@ -48,5 +48,7 @@ int show_sched(pid_t pid);
 int show_memory(pid_t pid);
 int show_affinity(pid_t pid);
 int show_namespaces(pid_t pid);
+int show_limits(pid_t pid);
+int show_environment(pid_t pid);
 
 #endif

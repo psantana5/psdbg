@@ -6,7 +6,8 @@ BINDIR = bin
 
 OBJS = $(OBJDIR)/proc.o $(OBJDIR)/list.o $(OBJDIR)/detail.o \
        $(OBJDIR)/why.o $(OBJDIR)/tree.o $(OBJDIR)/threads.o $(OBJDIR)/sched.o \
-       $(OBJDIR)/memory.o $(OBJDIR)/affinity.o $(OBJDIR)/namespaces.o $(OBJDIR)/main.o
+       $(OBJDIR)/memory.o $(OBJDIR)/affinity.o $(OBJDIR)/namespaces.o \
+       $(OBJDIR)/limits.o $(OBJDIR)/env.o $(OBJDIR)/main.o
 
 $(BINDIR)/psdbg: $(OBJS) | $(BINDIR)
 	$(CC) $(CFLAGS) -o $@ $^

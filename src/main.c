@@ -3,7 +3,8 @@
 int main(int argc, char **argv)
 {
     enum { M_LIST, M_TREE, M_DETAIL, M_THREADS, M_SCHED,
-           M_MEMORY, M_AFFINITY, M_NAMESPACES, M_WHY };
+           M_MEMORY, M_AFFINITY, M_NAMESPACES, M_WHY,
+           M_LIMITS, M_ENVIRONMENT };
 
     int mode = M_LIST;
     int fmt = FMT_DEFAULT;
@@ -26,6 +27,8 @@ int main(int argc, char **argv)
             printf("  --memory <pid>       Show memory usage\n");
             printf("  --affinity <pid>     Show CPU affinity\n");
             printf("  --namespaces <pid>   Show namespaces\n");
+            printf("  --limits <pid>       Show resource limits\n");
+            printf("  --environment <pid>  Show environment variables\n");
             printf("  --why <pid>          Quick process health check\n");
             printf("\n");
             printf("Filters (list mode):\n");
@@ -70,6 +73,14 @@ int main(int argc, char **argv)
                 target_pid = resolve_process(argv[i++]);
         } else if (strcmp(argv[i], "--namespaces") == 0) {
             mode = M_NAMESPACES; i++;
+            if (i < argc && argv[i][0] != '-')
+                target_pid = resolve_process(argv[i++]);
+        } else if (strcmp(argv[i], "--limits") == 0) {
+            mode = M_LIMITS; i++;
+            if (i < argc && argv[i][0] != '-')
+                target_pid = resolve_process(argv[i++]);
+        } else if (strcmp(argv[i], "--environment") == 0) {
+            mode = M_ENVIRONMENT; i++;
             if (i < argc && argv[i][0] != '-')
                 target_pid = resolve_process(argv[i++]);
         } else if (strcmp(argv[i], "--user") == 0) {
@@ -159,6 +170,18 @@ int main(int argc, char **argv)
             return 1;
         }
         return show_namespaces(target_pid);
+    case M_LIMITS:
+        if (target_pid <= 0) {
+            fprintf(stderr, "error: --limits requires a PID or process name\n");
+            return 1;
+        }
+        return show_limits(target_pid);
+    case M_ENVIRONMENT:
+        if (target_pid <= 0) {
+            fprintf(stderr, "error: --environment requires a PID or process name\n");
+            return 1;
+        }
+        return show_environment(target_pid);
     default:
         return show_list(fmt, filter_user, filter_cpu, filter_state, filter_name);
     }

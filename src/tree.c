@@ -82,9 +82,9 @@ static void print_subtree(pid_t parent, const struct proc_tree_node *procs,
         int idx = children[i];
         int is_last = (i == nchildren - 1);
 
-        printf("%s%s%s\n", prefix,
+        printf("%s%s%s (%d)\n", prefix,
                is_last ? "└── " : "├── ",
-               procs[idx].name);
+               procs[idx].name, procs[idx].pid);
 
         char new_prefix[1024];
         snprintf(new_prefix, sizeof(new_prefix), "%s%s",
