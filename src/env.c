@@ -19,16 +19,29 @@ int show_environment(pid_t pid)
         return -1;
     }
 
-    char buf[65536];
-    size_t n = fread(buf, 1, sizeof(buf) - 1, f);
+    size_t cap = 65536, n = 0;
+    char *buf = malloc(cap);
+    if (!buf) { fclose(f); return -1; }
+
+    size_t r;
+    while ((r = fread(buf + n, 1, cap - n, f)) > 0) {
+        n += r;
+        if (n == cap) {
+            cap *= 2;
+            char *tmp = realloc(buf, cap);
+            if (!tmp) { free(buf); fclose(f); return -1; }
+            buf = tmp;
+        }
+    }
     fclose(f);
 
-    if (n == 0) return 0;
+    if (n == 0) { free(buf); return 0; }
     buf[n] = '\0';
 
-    char *vars[4096];
-    int count = 0;
+    char **vars = malloc(sizeof(char *) * 4096);
+    if (!vars) { free(buf); return -1; }
 
+    int count = 0;
     char *p = buf;
     while (p < buf + n && count < 4096) {
         size_t len = strlen(p);
@@ -42,5 +55,7 @@ int show_environment(pid_t pid)
     for (int i = 0; i < count; i++)
         printf("%s\n", vars[i]);
 
+    free(vars);
+    free(buf);
     return 0;
 }
