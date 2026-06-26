@@ -9,6 +9,16 @@ struct thread_info {
     unsigned long stime;
 };
 
+static int cmp_runtime_desc(const void *a, const void *b)
+{
+    const struct thread_info *ta = a, *tb = b;
+    unsigned long long ra = ta->utime + ta->stime;
+    unsigned long long rb = tb->utime + tb->stime;
+    if (ra < rb) return 1;
+    if (ra > rb) return -1;
+    return 0;
+}
+
 int show_threads(pid_t pid)
 {
     char path[64];
@@ -59,10 +69,12 @@ int show_threads(pid_t pid)
         return 0;
     }
 
-    printf("%-6s %4s %-6s %-10s %s\n",
-           "TID", "CPU", "STATE", "PRIORITY", "RUNTIME");
+    qsort(threads, count, sizeof(struct thread_info), cmp_runtime_desc);
 
     long clk_tck = sysconf(_SC_CLK_TCK);
+
+    printf("%-6s %4s %-6s %-10s %s\n",
+           "TID", "CPU", "STATE", "PRIORITY", "RUNTIME");
 
     for (int i = 0; i < count; i++) {
         unsigned long long total = threads[i].utime + threads[i].stime;
